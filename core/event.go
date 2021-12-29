@@ -8,7 +8,6 @@ import (
 )
 
 type Event struct {
-	Id        string `json:"id"`
 	Type      string `json:"type"`
 	TimeStamp string `json:"timeStamp"`
 	Data      string `json:"data"`
@@ -20,7 +19,6 @@ type EventList struct {
 }
 
 func (e *Event) New(eventType string, data string) error {
-	e.Id = crypto.EventId()
 	e.Type = eventType
 	e.TimeStamp = time.Now().UTC().String()
 	e.Data = data

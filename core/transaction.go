@@ -6,11 +6,10 @@ import (
 )
 
 type Transaction struct {
-	Id     string   `json:"id"`
-	Type   string   `json:"type"`
-	Code   int      `json:"code"`
-	Hash   string   `json:"hash"`
-	Events []*Event `json:"events"`
+	Type   string     `json:"type"`
+	Code   int        `json:"code"`
+	Hash   string     `json:"hash"`
+	Events *EventList `json:"events"`
 }
 
 type TransactionList struct {
@@ -18,10 +17,9 @@ type TransactionList struct {
 }
 
 func (t *Transaction) New(txnType string, txnCode int, events *EventList) error {
-	t.Id = crypto.TransactionId()
 	t.Type = txnType
 	t.Code = txnCode
-	t.Events = events.Events
+	t.Events = events
 	j, er := encoding.JsonEncode(&t, false)
 	if er != nil {
 		return er
