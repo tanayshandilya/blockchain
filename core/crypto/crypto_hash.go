@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+
+	"github.com/tanayshandilya/blockchain/core/encoding"
 )
 
 func HashSHA256(data []byte) string {
@@ -13,5 +15,5 @@ func HashSHA256(data []byte) string {
 
 func HashSHA512(data []byte) string {
 	hash := sha512.Sum512(data)
-	return hex.EncodeToString(hash[:])
+	return encoding.Base58Encode(hash[:])
 }

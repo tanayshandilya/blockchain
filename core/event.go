@@ -8,6 +8,7 @@ import (
 )
 
 type Event struct {
+	Version   string `json:"version"`
 	Type      string `json:"type"`
 	TimeStamp string `json:"timeStamp"`
 	Data      string `json:"data"`
@@ -19,6 +20,7 @@ type EventList struct {
 }
 
 func (e *Event) New(eventType string, data string) error {
+	e.Version = EventVersion
 	e.Type = eventType
 	e.TimeStamp = time.Now().UTC().String()
 	e.Data = data
@@ -36,4 +38,10 @@ func (e *Event) ToJson() ([]byte, error) {
 
 func (e *EventList) Fill(events ...*Event) {
 	e.Events = events
+}
+
+func (e *Event) updateHash() {
+	e.Hash = ""
+	j, _ := encoding.JsonEncode(&e, false)
+	e.Hash = crypto.HashSHA256(j)
 }
