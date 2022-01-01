@@ -17,7 +17,6 @@ type Block struct {
 	Markle       string         `json:"markle"`
 	Signature    string         `json:"signature"`
 	Transactions []*Transaction `json:"transactions"`
-	Consensus    []string       `json:"consensus"`
 }
 
 func (b *Block) New(height int, previousHash string, transactions []*Transaction) error {
@@ -50,10 +49,10 @@ func (b *Block) ToJson() ([]byte, error) {
 func (b *Block) createGenesis() {
 	e := new(Event)
 	t := new(Transaction)
-	e.New("genesis", "origin")
+	e.New(TXN_GENESIS, "origin")
 	e.TimeStamp = "1996-05-31 00:00:00.0000000 +0000 UTC"
 	e.updateHash()
-	t.New("genesis", 0, []*Event{e})
+	t.New(TXN_GENESIS, 0, []*Event{e})
 	t.TimeStamp = "1996-05-31 00:00:00.0000000 +0000 UTC"
 	t.updateHash()
 	b.Version = BlockVersion
