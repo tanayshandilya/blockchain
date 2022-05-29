@@ -1,4 +1,4 @@
-package core
+package event
 
 import (
 	"time"
@@ -8,20 +8,18 @@ import (
 )
 
 type Event struct {
-	Version   string `json:"version"`
-	Type      string `json:"type"`
-	TimeStamp string `json:"timeStamp"`
-	Data      string `json:"data"`
-	Hash      string `json:"hash"`
+	Version   string      `json:"version"`
+	Type      string      `json:"type"`
+	Code      string      `json:"code"`
+	TimeStamp string      `json:"timeStamp"`
+	Data      interface{} `json:"data"`
+	Hash      string      `json:"hash"`
 }
 
-type EventList struct {
-	Events []*Event `json:"events"`
-}
-
-func (e *Event) New(eventType string, data string) error {
+func (e *Event) create(eventType string, data interface{}) error {
 	e.Version = EventVersion
 	e.Type = eventType
+	e.Code = crypto.HashSHA256([]byte(eventType + EventVersion))
 	e.TimeStamp = time.Now().UTC().String()
 	e.Data = data
 	j, er := encoding.JsonEncode(&e, false)
@@ -34,10 +32,6 @@ func (e *Event) New(eventType string, data string) error {
 
 func (e *Event) ToJson() ([]byte, error) {
 	return encoding.JsonEncode(&e, true)
-}
-
-func (e *EventList) Fill(events ...*Event) {
-	e.Events = events
 }
 
 func (e *Event) updateHash() {

@@ -1,21 +1,24 @@
-package core
+package wallet
 
 import (
 	"errors"
 	"fmt"
 
+	"github.com/tanayshandilya/blockchain/core"
+	"github.com/tanayshandilya/blockchain/core/block"
 	"github.com/tanayshandilya/blockchain/core/crypto"
 	"github.com/tanayshandilya/blockchain/core/encoding"
+	"github.com/tanayshandilya/blockchain/core/transaction"
 )
 
 type Wallet struct {
-	Address        string `json:"address"`
-	PrivateKey     string `json:"privateKey"`
-	Balance        int    `json:"balance"`
-	StateSignature string `json:"stateSignature"`
+	Address        string  `json:"address"`
+	PrivateKey     string  `json:"privateKey"`
+	Balance        float64 `json:"balance"`
+	StateSignature string  `json:"stateSignature"`
 }
 
-func (w *Wallet) New() error {
+func (w *Wallet) New(chain *core.BlockChain) error {
 	privateKey, publicKey, err := crypto.CreateKeyPair()
 	if err != nil {
 		return err
@@ -23,19 +26,19 @@ func (w *Wallet) New() error {
 	w.Address = encoding.Base58Encode(publicKey)
 	w.PrivateKey = encoding.Base58Encode(privateKey)
 	w.Balance = 0
-	err1 := w.SignState()
+	err1 := w.signState()
 	if err1 != nil {
 		return err1
 	}
 	return nil
 }
 
-func (w *Wallet) SignState() error {
+func (w *Wallet) signState() error {
 	privateKey, err := crypto.DecodePrivateKey(encoding.Base58Decode(w.PrivateKey))
 	if err != nil {
 		return err
 	}
-	data := w.Address + fmt.Sprintf("%d", w.Balance)
+	data := w.Address + fmt.Sprintf("%f", w.Balance)
 	sign, err1 := crypto.Sign(privateKey, []byte(data))
 	if err1 != nil {
 		return err1
@@ -44,7 +47,7 @@ func (w *Wallet) SignState() error {
 	return nil
 }
 
-func (w *Wallet) SignTransaction(txn *Transaction) ([]byte, error) {
+func (w *Wallet) signTransaction(txn *transaction.Transaction) ([]byte, error) {
 	privateKey, err := crypto.DecodePrivateKey(encoding.Base58Decode(w.PrivateKey))
 	if err != nil {
 		return []byte{}, err
@@ -60,7 +63,7 @@ func (w *Wallet) SignTransaction(txn *Transaction) ([]byte, error) {
 	return sign, nil
 }
 
-func (w *Wallet) SignBlock(block *Block) ([]byte, error) {
+func (w *Wallet) signBlock(block *block.Block) ([]byte, error) {
 	privateKey, err := crypto.DecodePrivateKey(encoding.Base58Decode(w.PrivateKey))
 	if err != nil {
 		return []byte{}, err
@@ -76,7 +79,7 @@ func (w *Wallet) SignBlock(block *Block) ([]byte, error) {
 	return sign, nil
 }
 
-func (w *Wallet) UpdateBalance(amt int, updateType string) error {
+func (w *Wallet) updateBalance(amt float64, updateType string) error {
 	if updateType == "add" {
 		w.Balance = w.Balance + amt
 	} else if updateType == "sub" {
@@ -86,7 +89,7 @@ func (w *Wallet) UpdateBalance(amt int, updateType string) error {
 			w.Balance = w.Balance - amt
 		}
 	}
-	err := w.SignState()
+	err := w.signState()
 	if err != nil {
 		return err
 	}

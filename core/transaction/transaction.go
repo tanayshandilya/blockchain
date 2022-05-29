@@ -1,4 +1,4 @@
-package core
+package transaction
 
 import (
 	"strings"
@@ -6,26 +6,21 @@ import (
 
 	"github.com/tanayshandilya/blockchain/core/crypto"
 	"github.com/tanayshandilya/blockchain/core/encoding"
+	"github.com/tanayshandilya/blockchain/core/event"
 )
 
 type Transaction struct {
-	Version   string   `json:"version"`
-	Type      string   `json:"type"`
-	Code      int      `json:"code"`
-	TimeStamp string   `json:"timeStamp"`
-	Hash      string   `json:"hash"`
-	Markle    string   `json:"markle"`
-	Events    []*Event `json:"events"`
+	Version   string         `json:"version"`
+	Type      string         `json:"type"`
+	TimeStamp string         `json:"timeStamp"`
+	Hash      string         `json:"hash"`
+	Markle    string         `json:"markle"`
+	Events    []*event.Event `json:"events"`
 }
 
-type TransactionList struct {
-	Transactions []*Transaction `json:"transactions"`
-}
-
-func (t *Transaction) New(txnType string, txnCode int, events []*Event) error {
+func (t *Transaction) New(txnType string, events []*event.Event) error {
 	t.Version = TransactionVersion
 	t.Type = txnType
-	t.Code = txnCode
 	t.Events = events
 	t.TimeStamp = time.Now().UTC().String()
 	t.Markle = createEventMarkle(events)
@@ -37,7 +32,7 @@ func (t *Transaction) New(txnType string, txnCode int, events []*Event) error {
 	return nil
 }
 
-func createEventMarkle(events []*Event) string {
+func createEventMarkle(events []*event.Event) string {
 	hashes := []string{}
 	for _, e := range events {
 		hashes = append(hashes, e.Hash)
@@ -47,10 +42,6 @@ func createEventMarkle(events []*Event) string {
 
 func (t *Transaction) ToJson() ([]byte, error) {
 	return encoding.JsonEncode(&t, true)
-}
-
-func (t *TransactionList) Fill(txns ...*Transaction) {
-	t.Transactions = txns
 }
 
 func (t *Transaction) updateHash() {
